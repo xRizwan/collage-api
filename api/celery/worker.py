@@ -1,7 +1,7 @@
 from celery import Celery
 from fastapi import UploadFile
 from time import sleep
-from api.helpers import merge_images, save_images
+from api.helpers import merge_images, save_images, OrientationType
 from typing import List
 
 # class CeleryConfig:
@@ -23,18 +23,13 @@ def add(x, y):
     return x + y
 
 @celery_app.task(name="generate_image")
-def generate_image(images: List[UploadFile]):
+def generate_image(images: List[UploadFile], orientation: OrientationType):
     saved_images_path = save_images(images)
-    generated_image = merge_images(saved_images_path)
-    # return generated_image.filename
+    generated_image_namge = merge_images(saved_images_path, orientation)
+    return generated_image_namge
 
 
 # celery_app.config_from_object(CeleryConfig)
-
-
-# from celery.result import AsyncResult
-# res = AsyncResult("your-task-id")
-# res.ready()
 
 
 # python -m flower --app=tasks.celery_app worker -E

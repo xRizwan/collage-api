@@ -1,24 +1,32 @@
-from fastapi import UploadFile, File, status
+from fastapi import UploadFile, File, status, Form
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from typing import List
+from celery.result import AsyncResult
 from api.celery.worker import generate_image
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from ..helpers import OrientationType
 
 class AsyncResultId(BaseModel):
     id: str
 
 router = APIRouter(prefix="/collage")
 
-@router.get("/")
-def get_route():
-    print("here")
-    pass
+@router.get("/{async_id}")
+def get_route(async_id: str):
+    res = AsyncResult(async_id)
+    is_ready = res.ready()
+    print(res)
+    if is_ready:
+        return JSONResponse(content={"result": "ready"}, status_code=status.HTTP_200_OK)
+    return JSONResponse(content={"result": "pending"}, status_code=status.HTTP_200_OK)
 
 @router.post("/")
-def images(images: List[UploadFile] = File(...)):
+def images(orientation: OrientationType | None = Form(default="vertical"), images: List[UploadFile] = File(...)):
+    print(orientation)
     print(len(images))
     
-    result = generate_image.apply_async(args=[images], serializer="pickle")
+    result = generate_image.apply_async(args=[images, orientation], serializer="pickle")
     print(result)
 
     return AsyncResultId(id=result.id)
