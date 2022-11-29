@@ -1,7 +1,7 @@
 from PIL import Image
 from PIL.Image import Image as ImageType
 from fastapi import UploadFile
-from typing import List, Literal, TypedDict
+from typing import List, Literal
 
 IMAGE_OFFSET = 200
 OrientationType = Literal["vertical", "horizontal"]
@@ -37,7 +37,7 @@ def generate_new_sizes(base_image: ImageType, offset: int, total_images: int, is
 
     return {"width": new_image_total_width, "height": new_image_total_height}
 
-def create_new_image(images_path: List[str], offset: int, orientation: OrientationType) -> ImageType:
+def create_new_image(images_path: List[str], orientation: OrientationType, offset: int | None = IMAGE_OFFSET, color: str | None = (255, 255, 255)) -> ImageType:
     opened_images = open_images(images_path)
     base_image = opened_images[0]
     total_images = len(opened_images)
@@ -45,7 +45,7 @@ def create_new_image(images_path: List[str], offset: int, orientation: Orientati
     is_horizontal = orientation == "horizontal"
     new_sizes = generate_new_sizes(base_image, offset, total_images, is_horizontal)
 
-    new_image = Image.new('RGB',(new_sizes['width'], new_sizes['height']), (250,250,250))
+    new_image = Image.new('RGB',(new_sizes['width'], new_sizes['height']), color)
 
     if is_horizontal:
         last_width = 0 + offset
@@ -62,8 +62,8 @@ def create_new_image(images_path: List[str], offset: int, orientation: Orientati
 
     return new_image
 
-def merge_images(images_path: List[str], orientation: OrientationType) -> str:
-    new_image = create_new_image(images_path, IMAGE_OFFSET, orientation)
+def merge_images(images_path: List[str], orientation: OrientationType, border: int | None, color: str | None) -> str:
+    new_image = create_new_image(images_path, orientation=orientation, offset=border, color=color)
     new_image.save("mergedimages/merged_image.jpg","JPEG")
     new_image.show()
 

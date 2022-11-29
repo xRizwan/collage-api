@@ -9,9 +9,9 @@ celery_app.set_default()
 celery_app.autodiscover_tasks(["api"])
 
 @celery_app.task(name="generate_image")
-def generate_image(images: List[UploadFile], orientation: OrientationType):
+def generate_image(images: List[UploadFile], orientation: OrientationType, border: int | None, color: str | None):
     saved_images_path = save_images(images)
-    generated_image_namge = merge_images(saved_images_path, orientation)
+    generated_image_namge = merge_images(saved_images_path, orientation, border, color)
     return generated_image_namge
 
 # run celery
