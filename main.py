@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from api.routers import collage
-# from api.celery.celery_app import celery_app
 
 origins = ['*']
 
@@ -16,7 +15,6 @@ app.add_middleware(
     expose_headers=["*"],
 )
 app.include_router(collage.router)
-# app.celery = celery_app
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
