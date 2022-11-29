@@ -1,6 +1,6 @@
 from celery import Celery
 from fastapi import UploadFile
-from api.helpers import merge_images, save_images, OrientationType
+from api.helpers import merge_images, save_images, resize_images, OrientationType
 from typing import List
 
 
@@ -11,6 +11,7 @@ celery_app.autodiscover_tasks(["api"])
 @celery_app.task(name="generate_image")
 def generate_image(images: List[UploadFile], orientation: OrientationType, border: int | None, color: str | None):
     saved_images_path = save_images(images)
+    # resized_images_path = resize_images(saved_images_path)
     generated_image_namge = merge_images(saved_images_path, orientation, border, color)
     return generated_image_namge
 

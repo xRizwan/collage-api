@@ -2,15 +2,22 @@ from PIL import Image
 from PIL.Image import Image as ImageType
 from fastapi import UploadFile
 from typing import List, Literal
+from datetime import datetime
 
 IMAGE_OFFSET = 200
+IMAGE_SIZE = 300
 OrientationType = Literal["vertical", "horizontal"]
+
+def get_new_image_path() -> str:
+    date = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+    image_path = f"images/{date}.png"
+    return image_path
 
 def save_images(images: List[UploadFile]) -> List[str]:
     saved_images_path: List[str] = []
 
     for image in images:
-        path_name = f"images/{image.filename}"
+        path_name = get_new_image_path()
         try:
             with open(path_name, 'wb') as f:
                 while contents := image.file.read(1024 * 1024):
@@ -21,6 +28,15 @@ def save_images(images: List[UploadFile]) -> List[str]:
         finally:
             image.file.close()
     return saved_images_path
+
+def resize_images(images: List[str])-> List[str]:
+    resized_images_paths = []
+    for image in images:
+        image = Image.open(image).convert('RGBA').resize((IMAGE_SIZE, IMAGE_SIZE))
+        image_path = get_new_image_path()
+        image.save(image_path)
+        resized_images_paths.append(image_path)
+    return resized_images_paths
 
 def open_images(images_path: List[str]) -> List[ImageType]:
     opened_images = []
